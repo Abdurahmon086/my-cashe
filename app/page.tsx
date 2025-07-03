@@ -1,12 +1,11 @@
+import { getAllCashe } from "@/actions/user.action";
 import { ModeToggle } from "@/components/share/mode-toggle";
 import { DataTable } from "@/components/tables/main.tables";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
-import data from "@/components/tables/data.json";
+export default async function Home() {
+  const data = await getAllCashe();
 
-export default function Home() {
   return (
     <div className="container mx-auto py-10 pt-5">
       <div className="border rounded-2xl py-5 px-10 w-full flex justify-between items-center">
@@ -51,7 +50,7 @@ export default function Home() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-2 gap-5 mt-10">
+      {/* <div className="grid grid-cols-2 gap-5 mt-10">
         <Card className=" gap-0">
           <CardHeader>
             <CardTitle className="text-xl">Daromatingizni kiriting</CardTitle>
@@ -70,10 +69,10 @@ export default function Home() {
             <Button>Kiritish</Button>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       <div className="mt-10">
-        <DataTable data={data} />
+        <DataTable data={data.data?.total_data} />
       </div>
     </div>
   );

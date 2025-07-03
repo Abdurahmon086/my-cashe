@@ -1,7 +1,10 @@
 "use server";
 
+import { getUserIdFromToken } from "@/lib/get-user-from-token";
 import { signJwt } from "@/lib/jwt";
 import { connectToDatabase } from "@/lib/mongodb";
+import Expense from "@/models/Expense";
+import Income from "@/models/Income";
 import User from "@/models/User";
 import { IUserDB } from "@/types";
 import bcrypt from "bcryptjs";
@@ -90,5 +93,34 @@ export async function getUser(id: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return { status: 500, data: null, message: "Error getting user" };
+  }
+}
+
+export async function getAllCashe() {
+  try {
+    await connectToDatabase();
+
+    const userId = await getUserIdFromToken();
+    if (!userId) return { status: 401, message: "Not authenticated" };
+
+    const expense = await Expense.find({ user: userId });
+    const income = await Income.find({ user: userId });
+
+    const totalExpense = expense.reduce((acc, curr) => acc + curr.amount, 0);
+    const totalIncome = income.reduce((acc, curr) => acc + curr.amount, 0);
+
+    const totalCashe = totalIncome - totalExpense;
+
+    const data = {
+      totalExpense,
+      totalIncome,
+      totalCashe,
+      total_data: [...expense, ...income],
+    };
+
+    return { status: 200, data: JSON.parse(JSON.stringify(data)), message: "Get all cashe fetched successfully" };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    return { status: 500, data: null, message: "Error getting getAllCashe" };
   }
 }
