@@ -32,16 +32,16 @@ import { AddIncomeDialog } from "../dialogs/income-dialog";
 
 export const schema = z.object({
   id: z.number(),
-  title: z.string(), // Mazmuni
-  category: z.string(), // Turi (daromat/xarajat)
-  amount: z.number(), // Miqdori
-  date: z.string(), // Sana
+  amount: z.number(),
+  category: z.string(),
+  description: z.string(),
+  date: z.string(),
 });
 
 type DataType = z.infer<typeof schema>;
 
 function TableCellViewer({ item }: { item: DataType }) {
-  return <span>{item.title}</span>;
+  return <span>{item.description}</span>;
 }
 
 const columns: ColumnDef<DataType>[] = [
@@ -128,32 +128,34 @@ export function DataTable({ data: initialData }: { data: DataType[] }) {
           <TabsTrigger value="daromat">Daromat</TabsTrigger>
           <TabsTrigger value="xarajat">Xarajat</TabsTrigger>
         </TabsList>
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <ColumnsIcon />
-                <span className="hidden lg:inline">Customize Columns</span>
-                <span className="lg:hidden">Columns</span>
-                <ChevronDownIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {table
-                .getAllColumns()
-                .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center gap-2 ">
+          <div className="hidden md:block">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <ColumnsIcon />
+                  <span className="hidden lg:inline">Customize Columns</span>
+                  <span className="lg:hidden">Columns</span>
+                  <ChevronDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {table
+                  .getAllColumns()
+                  .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <CategoryDialog />
           <AddIncomeDialog />
           <AddDialog />

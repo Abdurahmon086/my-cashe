@@ -109,12 +109,29 @@ export async function getAllCashe() {
     const totalExpense = expense.reduce((acc, curr) => acc + curr.amount, 0);
     const totalIncome = income.reduce((acc, curr) => acc + curr.amount, 0);
 
+    const total_last_month_expense = expense.reduce((acc, curr) => {
+      const date = new Date(curr.createdAt);
+      if (date.getMonth() === new Date().getMonth() - 1) {
+        return acc + curr.amount;
+      }
+      return acc;
+    }, 0);
+
+    const total_last_month_income = income.reduce((acc, curr) => {
+      const date = new Date(curr.createdAt);
+      if (date.getMonth() === new Date().getMonth() - 1) {
+        return acc + curr.amount;
+      }
+      return acc;
+    }, 0);
     const totalCashe = totalIncome - totalExpense;
 
     const data = {
       totalExpense,
       totalIncome,
       totalCashe,
+      total_last_month_expense,
+      total_last_month_income,
       total_data: [...expense, ...income],
     };
 

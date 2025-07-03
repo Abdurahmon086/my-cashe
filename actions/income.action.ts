@@ -1,3 +1,5 @@
+"use server";
+
 import Income from "@/models/Income";
 import { incomeSchema } from "@/schemas/income.schemas";
 import { getUserIdFromToken } from "@/lib/get-user-from-token";
