@@ -19,6 +19,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronsLeftIcon, ChevronsRightIcon, ColumnsIcon } from "lucide-react";
 import { z } from "zod";
+import dayjs from "dayjs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -31,11 +32,14 @@ import { CategoryDialog } from "../dialogs/category-dialog";
 import { AddIncomeDialog } from "../dialogs/income-dialog";
 
 export const schema = z.object({
-  id: z.number(),
+  _id: z.number(),
   amount: z.number(),
-  category: z.string(),
+  category: z.object({
+    name: z.string(),
+  }),
   description: z.string(),
   date: z.string(),
+  type: z.string(),
 });
 
 type DataType = z.infer<typeof schema>;
@@ -48,8 +52,19 @@ const columns: ColumnDef<DataType>[] = [
   {
     accessorKey: "title",
     header: "Mazmuni",
-    cell: ({ row }: { row: Row<DataType> }) => <TableCellViewer item={row.original} />,
+    cell: ({ row }: { row: Row<DataType> }) => (
+      <div className="w-64 font-semibold text-base">
+        <TableCellViewer item={row.original} />
+      </div>
+    ),
     enableHiding: false,
+  },
+  {
+    accessorKey: "type",
+    header: "Turi",
+    cell: ({ row }) => (
+      <Badge variant={row.original.type === "income" ? "secondary" : "destructive"}>{row.original.type === "income" ? "Daromat" : "Xarajat"}</Badge>
+    ),
   },
   {
     accessorKey: "category",
@@ -57,7 +72,7 @@ const columns: ColumnDef<DataType>[] = [
     cell: ({ row }: { row: Row<DataType> }) => (
       <div className="w-32">
         <Badge variant="outline" className="px-1.5 text-muted-foreground">
-          {row.original.category}
+          {row.original.category.name}
         </Badge>
       </div>
     ),
@@ -70,7 +85,7 @@ const columns: ColumnDef<DataType>[] = [
   {
     accessorKey: "date",
     header: "Sana",
-    cell: ({ row }: { row: Row<DataType> }) => <span>{row.original.date}</span>,
+    cell: ({ row }: { row: Row<DataType> }) => <span>{dayjs(row.original.date).format("DD.MM.YYYY HH:mm")}</span>,
   },
 ];
 
@@ -87,8 +102,8 @@ export function DataTable({ data: initialData }: { data: DataType[] }) {
 
   // Filter data based on tab
   const filteredData = React.useMemo(() => {
-    if (tab === "daromat") return initialData.filter((d) => d.category === "daromat");
-    if (tab === "xarajat") return initialData.filter((d) => d.category === "xarajat");
+    if (tab === "daromat") return initialData.filter((d) => d.type === "income");
+    if (tab === "xarajat") return initialData.filter((d) => d.type === "expense");
     return initialData;
   }, [tab, initialData]);
 
@@ -102,7 +117,7 @@ export function DataTable({ data: initialData }: { data: DataType[] }) {
       columnFilters,
       pagination,
     },
-    getRowId: (row) => row.id.toString(),
+    getRowId: (row) => row._id.toString(),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,

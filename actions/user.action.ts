@@ -3,6 +3,7 @@
 import { getUserIdFromToken } from "@/lib/get-user-from-token";
 import { signJwt } from "@/lib/jwt";
 import { connectToDatabase } from "@/lib/mongodb";
+import Category from "@/models/Category";
 import Expense from "@/models/Expense";
 import Income from "@/models/Income";
 import User from "@/models/User";
@@ -45,7 +46,6 @@ export async function createUser(data: IUserDB) {
 
 export async function loginUser(email: string, password: string) {
   try {
-    console.log("asd");
     await connectToDatabase();
     const user = await User.findOne({ email });
     if (!user) {
@@ -103,27 +103,35 @@ export async function getAllCashe() {
     const userId = await getUserIdFromToken();
     if (!userId) return { status: 401, message: "Not authenticated" };
 
-    const expense = await Expense.find({ user: userId });
-    const income = await Income.find({ user: userId });
+    const expense = await Expense.find({ user: userId }).populate("category");
+    const income = await Income.find({ user: userId }).populate("category");
 
+    // Income uchun category obyektini qo‘shish:
+    const incomeWithCategory = await Promise.all(
+      income.map(async (item) => {
+        const category = await Category.findById(item.category);
+        return {
+          ...item.toObject(),
+          category: category ? category.toObject() : null,
+        };
+      })
+    );
     const totalExpense = expense.reduce((acc, curr) => acc + curr.amount, 0);
     const totalIncome = income.reduce((acc, curr) => acc + curr.amount, 0);
 
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
     const total_last_month_expense = expense.reduce((acc, curr) => {
-      const date = new Date(curr.createdAt);
-      if (date.getMonth() === new Date().getMonth() - 1) {
-        return acc + curr.amount;
-      }
-      return acc;
+      const date = new Date(curr.date);
+      return date.getFullYear() === lastMonth.getFullYear() && date.getMonth() === lastMonth.getMonth() ? acc + curr.amount : acc;
     }, 0);
 
     const total_last_month_income = income.reduce((acc, curr) => {
-      const date = new Date(curr.createdAt);
-      if (date.getMonth() === new Date().getMonth() - 1) {
-        return acc + curr.amount;
-      }
-      return acc;
+      const date = new Date(curr.date);
+      return date.getFullYear() === lastMonth.getFullYear() && date.getMonth() === lastMonth.getMonth() ? acc + curr.amount : acc;
     }, 0);
+
     const totalCashe = totalIncome - totalExpense;
 
     const data = {
@@ -132,7 +140,7 @@ export async function getAllCashe() {
       totalCashe,
       total_last_month_expense,
       total_last_month_income,
-      total_data: [...expense, ...income],
+      total_data: [...expense, ...incomeWithCategory],
     };
 
     return { status: 200, data: JSON.parse(JSON.stringify(data)), message: "Get all cashe fetched successfully" };

@@ -53,7 +53,7 @@ export default async function Home() {
             <CardTitle className="text-base sm:text-lg md:text-xl">Qoldiq</CardTitle>
           </CardHeader>
           <CardContent>
-            <h4 className="font-bold text-green-500 text-2xl sm:text-3xl md:text-4xl">{data?.totalIncome} so&apos;m</h4>
+            <h4 className="font-bold text-yellow-500 text-2xl sm:text-3xl md:text-4xl">{data?.totalCashe} so&apos;m</h4>
           </CardContent>
         </Card>
       </div>

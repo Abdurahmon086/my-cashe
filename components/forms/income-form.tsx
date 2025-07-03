@@ -78,7 +78,7 @@ export function IncomeForm() {
               <FormLabel>Kategoriya</FormLabel>
               <FormControl>
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Kategoriya tanlang" />
                   </SelectTrigger>
                   <SelectContent>

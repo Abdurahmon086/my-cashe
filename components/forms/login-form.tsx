@@ -30,7 +30,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     try {
       setIsPending(true);
-      console.log("asd");
 
       const { status, message } = await loginUser(values.email, values.password);
       if (status === 200) {
